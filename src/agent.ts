@@ -116,6 +116,7 @@ export default class SocksProxyAgent extends Agent {
 	private lookup: boolean;
 	private proxy: SocksProxy;
 	private tlsConnectionOptions: tls.ConnectionOptions;
+	private socket_options: SocksClientOptions;
 
 	constructor(_opts: string | SocksProxyAgentOptions) {
 		let opts: SocksProxyAgentOptions;
@@ -135,6 +136,7 @@ export default class SocksProxyAgent extends Agent {
 		this.lookup = parsedProxy.lookup;
 		this.proxy = parsedProxy.proxy;
 		this.tlsConnectionOptions = opts.tls || {};
+		this.socket_options = opts.socket_options || {};
 	}
 
 	/**
@@ -147,7 +149,7 @@ export default class SocksProxyAgent extends Agent {
 		req: ClientRequest,
 		opts: RequestOptions
 	): Promise<net.Socket> {
-		const { lookup, proxy } = this;
+		const { lookup, proxy, socket_options } = this;
 		let { host, port, timeout } = opts;
 
 		if (!host) {
@@ -163,7 +165,8 @@ export default class SocksProxyAgent extends Agent {
 			proxy,
 			destination: { host, port },
 			command: 'connect',
-			timeout
+			timeout,
+			socket_options
 		};
 		debug('Creating socks proxy connection: %o', socksOpts);
 		const { socket } = await SocksClient.createConnection(socksOpts);
