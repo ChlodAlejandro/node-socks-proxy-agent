@@ -7,6 +7,8 @@ import { Agent, ClientRequest, RequestOptions } from 'agent-base';
 import { SocksClient, SocksProxy, SocksClientOptions } from 'socks';
 import { SocksProxyAgentOptions } from '.';
 
+type SocketConnectOpts = net.SocketConnectOpts;
+
 const debug = createDebug('socks-proxy-agent');
 
 function dnsLookup(host: string): Promise<string> {
@@ -116,7 +118,7 @@ export default class SocksProxyAgent extends Agent {
 	private lookup: boolean;
 	private proxy: SocksProxy;
 	private tlsConnectionOptions: tls.ConnectionOptions;
-	private socket_options: SocksClientOptions;
+	private socket_options?: SocketConnectOpts;
 
 	constructor(_opts: string | SocksProxyAgentOptions) {
 		let opts: SocksProxyAgentOptions;
@@ -136,7 +138,7 @@ export default class SocksProxyAgent extends Agent {
 		this.lookup = parsedProxy.lookup;
 		this.proxy = parsedProxy.proxy;
 		this.tlsConnectionOptions = opts.tls || {};
-		this.socket_options = opts.socket_options || {};
+		this.socket_options = opts.socket_options;
 	}
 
 	/**
@@ -165,9 +167,10 @@ export default class SocksProxyAgent extends Agent {
 			proxy,
 			destination: { host, port },
 			command: 'connect',
-			timeout,
-			socket_options
+			timeout
 		};
+		if (socket_options)
+			socksOpts.socket_options = socket_options;
 		debug('Creating socks proxy connection: %o', socksOpts);
 		const { socket } = await SocksClient.createConnection(socksOpts);
 		debug('Successfully created socks proxy connection');

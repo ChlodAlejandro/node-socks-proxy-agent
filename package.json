@@ -1,5 +1,5 @@
 {
-  "name": "socks-proxy-agent",
+  "name": "@chlodalejandro/socks-proxy-agent",
   "version": "6.1.1",
   "description": "A SOCKS proxy `http.Agent` implementation for HTTP and HTTPS",
   "main": "dist/index",
